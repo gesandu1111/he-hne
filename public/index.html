@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>M.R.Gesa • Web Pair</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.75)),
+                  url("https://github.com/gesandu1111/2026-2/blob/main/WhatsApp%20Image%202025-12-31%20at%2010.33.02.jpeg?raw=true")
+                  no-repeat center/cover;
+      color: #fff;
+    }
+
+    .box {
+      width: 360px;
+      padding: 25px;
+      border-radius: 18px;
+      background: rgba(20,20,20,0.95);
+      box-shadow: 0 0 25px rgba(0,255,170,.35),
+                  inset 0 0 20px rgba(0,0,0,.8);
+      border: 1px solid rgba(0,255,170,.3);
+      text-align: center;
+      animation: glow 3s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 20px rgba(0,255,170,.25); }
+      to { box-shadow: 0 0 35px rgba(0,255,170,.55); }
+    }
+
+    .logo { font-size: 28px; font-weight: 900; color: #00ffaa; letter-spacing: 2px; }
+    .subtitle { font-size: 13px; opacity: .8; margin-bottom: 20px; }
+
+    .input-container {
+      display: flex;
+      margin-top: 15px;
+      background: #000;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #00ffaa;
+    }
+
+    .input-container input {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      outline: none;
+      background: #000;
+      color: #00ffaa;
+      font-size: 15px;
+    }
+
+    .input-container button {
+      padding: 14px 18px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg,#00ffaa,#00cc88);
+      color: #000;
+      font-weight: 800;
+      letter-spacing: 1px;
+      transition: 0.3s;
+    }
+
+    .input-container button:hover {
+      background: linear-gradient(135deg,#00cc88,#00ffaa);
+    }
+
+    #pair { margin-top: 20px; }
+    #copy { cursor: pointer; color: #00ffaa; text-shadow: 0 0 10px #00ffaa; }
+
+    #loading-spinner { display: none; margin-top: 15px; color: #00ffaa; font-size: 18px; }
+
+    footer { margin-top: 18px; font-size: 11px; opacity: .6; }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <div class="logo">M.R.Gesa</div>
+    <div class="subtitle">Powerful WhatsApp Web Pair System</div>
+
+    <i class="fa fa-user fa-2x" style="color:#00ffaa"></i>
+    <p style="font-size:13px;margin-top:12px;">
+      🔢 Enter your WhatsApp number with country code
+    </p>
+
+    <div class="input-container">
+      <input id="number" type="number" placeholder="+9470xxxxxxx">
+      <button id="submit">PAIR</button>
+    </div>
+
+    <div id="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i> Generating code...
+    </div>
+
+    <main id="pair"></main>
+
+    <footer>
+      © 2026 • M.R.Gesa Web Pair
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+
+  <script>
+    const pairContainer = document.getElementById("pair");
+    const submitBtn = document.getElementById("submit");
+    const numberInput = document.getElementById("number");
+
+    async function copyCode() {
+      const obj = document.getElementById("copy");
+      await navigator.clipboard.writeText(obj.innerText.replace("CODE: ", ""));
+      const old = obj.innerText;
+      obj.innerText = "✔ COPIED";
+      setTimeout(() => obj.innerText = old, 800);
+    }
+
+    submitBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      pairContainer.innerHTML = "";
+      
+      const number = numberInput.value.replace(/[^0-9]/g, "");
+      if (!number) { pairContainer.innerHTML = "❗ Enter your WhatsApp number"; return; }
+      if (number.length < 11) { pairContainer.innerHTML = "❗ Invalid number format"; return; }
+
+      document.getElementById("loading-spinner").style.display = "block";
+
+      try {
+        const { data } = await axios(`/code?number=${number}`);
+        document.getElementById("loading-spinner").style.display = "none";
+
+        if (data.code) {
+          // Session code received
+          pairContainer.innerHTML = `<div id="copy" onclick="copyCode()">CODE: ${data.code}</div>`;
+        } else {
+          // QR HTML returned
+          pairContainer.innerHTML = data;
+        }
+      } catch (err) {
+        document.getElementById("loading-spinner").style.display = "none";
+        pairContainer.innerHTML = "❌ Service Unavailable";
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>
